@@ -22,13 +22,13 @@ module.exports = {
   },
   dev: {
     env: require('./dev.env'),
-    port: 8080,
+    port: 8081,
     autoOpenBrowser: true,
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
-        target: "http://193.198.208.164:13080/",
+        target: 'http://193.198.208.164:13080/',
         changeOrigin: true
       }
     },
@@ -46,7 +46,7 @@ module.exports = {
     assetsRoot: path.resolve(__dirname, '../dist'),
     proxyTable: {
       '/api': {
-        target: "http://193.198.208.164:13080/",
+        target: 'http://193.198.208.164:13080/',
         changeOrigin: true
       }
     },
