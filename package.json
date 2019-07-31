@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "axios": "^0.19.0",
-    "bootstrap": "^3.3.7",
+    "bootstrap": "^3.4.1",
     "chart.js": "^2.7.3",
     "cleave.js": "^1.4.7",
     "flatpickr": "^4.5.2",

@@ -124,10 +124,12 @@
 <script>
 import StatsCard from "components/UIComponents/Cards/StatsCard.vue";
 import ChartCard from "components/UIComponents/Cards/ChartCard.vue";
+import Vue from 'vue';
 import { SensorType } from "utils/constants";
 import { getFormattedDate } from "utils";
 import { setInterval, clearInterval } from "timers";
 import { debug } from "util";
+import { Api } from 'utils/api';
 
 export default {
   components: {
@@ -154,7 +156,7 @@ export default {
           type: "warning",
           icon: "ti-user",
           title: "Users",
-          value: "1024",
+          value: "",
           footerText: "Updated now",
           footerIcon: "ti-reload"
         },
@@ -162,7 +164,7 @@ export default {
           type: "success",
           icon: "ti-home",
           title: "Farms",
-          value: "3001",
+          value: "",
           footerText: "Last day",
           footerIcon: "ti-calendar"
         },
@@ -170,7 +172,7 @@ export default {
           type: "info",
           icon: "ti-alert",
           title: "Warnings",
-          value: "23",
+          value: "0",
           footerText: "Updated now",
           footerIcon: "ti-reload"
         },
@@ -346,9 +348,43 @@ export default {
         this.searchParams.dateFrom = null;
       }
     },
+    async setAdminStatsCards() {
+      
+      if(this.$store.getters.isAdmin)
+      {
+        const response = await Api.getUsers();
+        const usersCount = response.data.length;
+        const index = this.adminStatsCards.findIndex(x => x.title ==="Users");
+        const userModel = {
+          type: "warning",
+          icon: "ti-user",
+          title: "Users",
+          value: usersCount.toString(),
+          footerText: "Updated now",
+          footerIcon: "ti-reload"
+        }
+        //this.adminStatsCards[index].value = usersCount.toString();
+        Vue.set(this.adminStatsCards, index, userModel);
+
+        const farmResponse = await Api.getFarms();
+        const farmsCount = farmResponse.data.length;
+        const farmIndex = this.adminStatsCards.findIndex(x => x.title ==="Farms");
+        const farmModel = {
+          type: "success",
+          icon: "ti-home",
+          title: "Farms",
+          value: farmsCount.toString(),
+          footerText: "Last day",
+          footerIcon: "ti-calendar"
+        }
+
+        Vue.set(this.adminStatsCards, farmIndex, farmModel);
+      }
+    },
     async refreshFarmMeasurements() {
       await this.onFarmMeasurementsSubmit();
       await this.getCurrentFarmStats();
+      this.setAdminStatsCards();
       this.minutesFromLastRefresh = 0;
     },
     refreshMinutes() {
@@ -383,6 +419,7 @@ export default {
       1000 * 60 * 5
     ); // every 5 minutes
     this.refreshMinutesInterval = setInterval(this.refreshMinutes, 1000 * 60); // every minute
+    this.setAdminStatsCards();
   },
   destroyed() {
     clearInterval(this.refreshMeasurementInterval);
