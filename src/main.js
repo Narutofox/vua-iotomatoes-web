@@ -6,14 +6,14 @@ import GlobalComponents from './globalComponents'
 import GlobalFilters from './globalFilters'
 import SideBar from './components/UIComponents/SidebarPlugin'
 import VueProgressBar from 'vue-progressbar'
-import Notifications from "vue-notification";
-import Alert from "./utils/alert";
-import Api from "./utils/api";
+import Notifications from 'vue-notification'
+import Alert from './utils/alert'
+import Api from './utils/api'
 import App from './App'
 
 // Store and router
-import router from './router';
-import store from './store';
+import router from './router'
+import store from './store'
 
 // Library imports
 import 'bootstrap/dist/css/bootstrap.css'
@@ -36,18 +36,18 @@ const options = {
 
 // Plugin setup
 Vue.use(VueProgressBar, options)
-Vue.use(Notifications);
+Vue.use(Notifications)
 Vue.use(GlobalComponents)
 Vue.use(GlobalFilters)
 Vue.use(vClickOutside)
 Vue.use(SideBar)
-Vue.use(Alert);
-Vue.use(Api);
+Vue.use(Alert)
+Vue.use(Api)
 
 /* eslint-disable no-new */
 export default new Vue({
   el: '#app',
   render: h => h(App),
   router,
-  store,
+  store
 })
