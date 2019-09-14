@@ -13,14 +13,17 @@ import Overview from 'src/components/Dashboard/Views/Overview.vue'
 // import TableList from 'src/components/Dashboard/Views/TableList.vue'
 
 // Farm pages
-import Farms from 'src/components/Dashboard/Views/Farms.vue';
-import FarmOverview from 'src/components/Dashboard/Views/Farms/FarmOverview.vue';
-import EditFarmForm from 'src/components/Dashboard/Views/Farms/EditFarmForm.vue';
+import Farms from 'src/components/Dashboard/Views/Farms.vue'
+import FarmOverview from 'src/components/Dashboard/Views/Farms/FarmOverview.vue'
+import EditFarmForm from 'src/components/Dashboard/Views/Farms/EditFarmForm.vue'
 
 // User pages
-import Users from 'src/components/Dashboard/Views/Users.vue';
-import UserOverview from "src/components/Dashboard/Views/Users/UserOverview.vue";
-import EditProfileForm from "src/components/Dashboard/Views/Users/EditProfileForm.vue";
+import Users from 'src/components/Dashboard/Views/Users.vue'
+import UserOverview from 'src/components/Dashboard/Views/Users/UserOverview.vue'
+import EditProfileForm from 'src/components/Dashboard/Views/Users/EditProfileForm.vue'
+
+// Live feed page
+import LiveFeedIndex from 'src/components/Dashboard/Views/LiveFeed/Index.vue'
 
 const routes = [
   {
@@ -37,6 +40,11 @@ const routes = [
         path: 'overview',
         name: 'overview',
         component: Overview
+      },
+      {
+        path: 'live',
+        name: 'live-feed',
+        component: LiveFeedIndex
       },
       {
         path: 'profile',
@@ -89,7 +97,7 @@ const routes = [
           }
         ],
         meta: { adminAuth: true }
-      },
+      }
     ],
     meta: {
       requiresAuth: true

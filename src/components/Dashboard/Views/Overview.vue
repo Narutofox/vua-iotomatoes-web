@@ -1,9 +1,30 @@
 <template>
   <div>
-    <div class="row mb-1" v-if="!isAdmin">
+
+    <!--Stats cards-->
+    <div class="row">
+      <div class="col-lg-3 col-sm-6" v-for="(stats,index) in statsCards" :key="index">
+        <stats-card>
+          <div class="icon-big text-center" :class="`icon-${stats.type}`" slot="header">
+            <i :class="stats.icon"></i>
+          </div>
+          <div class="numbers" slot="content">
+            <p>{{stats.title}}</p>
+            <span v-html="stats.value">{{stats.value}}</span>
+          </div>
+          <div class="stats" slot="footer">
+            <i :class="stats.footerIcon"></i>
+            {{stats.footerText}}
+          </div>
+        </stats-card>
+      </div>
+    </div>
+    <hr>
+    <!--Farm measurements form-->
+        <div class="row mb-1">
       <form @submit.prevent="onFarmMeasurementsSubmit">
         <div class="col-lg-3 col-sm-6">
-          <fg-select label="Farm" v-model="searchParams.farmId" :options="farmList"/>
+          <fg-select v-on:change="onFarmChange($event)" label="Farm" v-model="searchParams.farmId" :options="farmList" />
         </div>
         <div class="col-lg-3 col-sm-6">
           <fg-date
@@ -37,28 +58,9 @@
         </div>
       </form>
     </div>
-    <hr>
-    <!--Stats cards-->
-    <div class="row">
-      <div class="col-lg-3 col-sm-6" v-for="(stats,index) in statsCards" :key="index">
-        <stats-card>
-          <div class="icon-big text-center" :class="`icon-${stats.type}`" slot="header">
-            <i :class="stats.icon"></i>
-          </div>
-          <div class="numbers" slot="content">
-            <p>{{stats.title}}</p>
-            <span v-html="stats.value">{{stats.value}}</span>
-          </div>
-          <div class="stats" slot="footer">
-            <i :class="stats.footerIcon"></i>
-            {{stats.footerText}}
-          </div>
-        </stats-card>
-      </div>
-    </div>
-
+    
     <!--Charts-->
-    <div class="row" v-if="!isAdmin">
+    <div class="row">
       <div class="col-lg-12">
         <chart-card
           :chart-data="airHumidityChartConfig.data"
@@ -73,7 +75,7 @@
         </chart-card>
       </div>
     </div>
-    <div class="row" v-if="!isAdmin">
+    <div class="row">
       <div class="col-lg-12">
         <chart-card
           :chart-data="temperatureChartConfig.data"
@@ -88,7 +90,7 @@
         </chart-card>
       </div>
     </div>
-    <div class="row" v-if="!isAdmin">
+    <div class="row">
       <div class="col-lg-12">
         <chart-card
           :chart-data="soilHumidityChartConfig.data"
@@ -180,9 +182,41 @@ export default {
           type: "success",
           icon: "ti-server",
           title: "Status",
-          value: "Online",
-          footerText: "In the last hour",
+          value: "",
+          footerText: this.refreshTimespan,
           footerIcon: "ti-timer"
+        },
+        {
+          type: "warning",
+          icon: "ti-shine",
+          title: "Temperature",
+          value: this.currentTemperature,
+          footerText: this.lastMeasurmentDateTimeStampTemperature,
+          footerIcon: "ti-reload"
+        },
+        {
+          type: "warning",
+          icon: "ti-light-bulb",
+          title: "Light",
+          value: this.currentLight,
+          footerText: this.lastMeasurmentDateTimeStampLight,
+          footerIcon: "ti-reload"
+        },
+        {
+          type: "info",
+          icon: "ti-cloud",
+          title: "Air humidity",
+          value: this.currentAirHumidity,
+          footerText: this.lastMeasurmentDateTimeStampAirHumidity,
+          footerIcon: "ti-reload"
+        },
+        {
+          type: "success",
+          icon: "ti-world",
+          title: "Soil humidity",
+          value: this.currentSoilHumidity,
+          footerText: this.lastMeasurmentDateTimeStampSoilHumidity,
+          footerIcon: "ti-reload"
         }
       ],
       humidityChartConfig: {},
@@ -218,7 +252,7 @@ export default {
           icon: "ti-shine",
           title: "Temperature",
           value: this.currentTemperature,
-          footerText: this.refreshTimespan,
+          footerText: this.lastMeasurmentDateTimeStampTemperature,
           footerIcon: "ti-reload"
         },
         {
@@ -226,7 +260,7 @@ export default {
           icon: "ti-light-bulb",
           title: "Light",
           value: this.currentLight,
-          footerText: this.refreshTimespan,
+          footerText: this.lastMeasurmentDateTimeStampLight,
           footerIcon: "ti-reload"
         },
         {
@@ -234,7 +268,7 @@ export default {
           icon: "ti-cloud",
           title: "Air humidity",
           value: this.currentAirHumidity,
-          footerText: this.refreshTimespan,
+          footerText: this.lastMeasurmentDateTimeStampAirHumidity,
           footerIcon: "ti-reload"
         },
         {
@@ -242,7 +276,7 @@ export default {
           icon: "ti-world",
           title: "Soil humidity",
           value: this.currentSoilHumidity,
-          footerText: this.refreshTimespan,
+          footerText: this.lastMeasurmentDateTimeStampSoilHumidity,
           footerIcon: "ti-reload"
         }
         /* {
@@ -271,6 +305,25 @@ export default {
       const airHum = this.getCurrentMeasurement(SensorType.AIR_HUMIDITY) || 0.00;
       return `${airHum}%`;
     },
+    lastMeasurmentDateTimeStampAirHumidity() {
+      const airHum = this.getCurrentMeasurementDateTimeStamp(SensorType.AIR_HUMIDITY) || "";
+      return `${airHum}`;
+    },
+    lastMeasurmentDateTimeStampLight() {
+      const light = this.getCurrentMeasurementDateTimeStamp(SensorType.LIGHT) || "";
+      return `${light}`;
+    },
+
+    lastMeasurmentDateTimeStampTemperature() {
+      const temp = this.getCurrentMeasurementDateTimeStamp(SensorType.TEMPERATURE) || "";
+      return `${temp}`;
+    },
+
+    lastMeasurmentDateTimeStampSoilHumidity() {
+      const soilHum = this.getCurrentMeasurementDateTimeStamp(SensorType.SOIL_HUMIDITY) || "";
+      return `${soilHum}`;
+    },
+
     refreshTimespan() {
       return this.minutesFromLastRefresh > 0
         ? `Updated ${this.minutesFromLastRefresh} ${
@@ -281,8 +334,28 @@ export default {
   },
   methods: {
     getCurrentMeasurement(sensorType) {
-      if (!this.currentFarmStats) return null;
-      return this.currentFarmStats[sensorType];
+      if (!this.currentFarmStats || !Array.isArray(this.currentFarmStats) || this.currentFarmStats .length == 0) return null;
+      //return this.currentFarmStats[sensorType];
+      let measurementData = this.currentFarmStats.find(
+        x => x.sensorTypeId === sensorType
+      ).data;
+
+      if(measurementData !== null && measurementData !== undefined && measurementData.length > 0){
+         return measurementData[0];
+      }
+      return 0.00;
+    },
+    getCurrentMeasurementDateTimeStamp(sensorType) {
+      if (!this.currentFarmStats || !Array.isArray(this.currentFarmStats) || this.currentFarmStats .length == 0 ) return null;
+      //return this.currentFarmStats[sensorType];
+      let measurementLabels = this.currentFarmStats.find(
+        x => x.sensorTypeId === sensorType
+      ).labels;
+
+      if(measurementLabels !== null && measurementLabels !== undefined && measurementLabels.length > 0){
+         return measurementLabels[0];
+      }
+      return null;
     },
     getChartLabel(sensorType) {
       switch (sensorType) {
@@ -309,11 +382,29 @@ export default {
       }
     },
     getChartConfiguration(sensorType) {
-      if (this.farmMeasurements === null) return null;
+      if (this.farmMeasurements === null || !Array.isArray(this.farmMeasurements) || this.farmMeasurements.length == 0) 
+      {
+          return new Promise((resolve, reject) => {
+            resolve({
+              data: {
+                labels: [],
+                datasets: [
+                  {
+                    label: this.getChartLabel(sensorType),
+                    data: [],
+                    backgroundColor: this.getChartColor(sensorType),
+                    borderColor: this.getChartColor(sensorType, "1"),
+                    borderWidth: 1
+                  }
+                ]
+              }
+            });
+          });
+      }
+      
       const measurement = this.farmMeasurements.find(
         x => x.sensorTypeId === sensorType
       );
-
       return new Promise((resolve, reject) => {
         resolve({
           data: {
@@ -352,6 +443,17 @@ export default {
       
       if(this.$store.getters.isAdmin)
       {
+           this.updateCurrentUsersCountAdminStatsCards();
+           this.updateCurrentFarmsCountAdminStatsCards();
+           this.updateCurrentSoilHumidityAdminStatsCards();
+           this.updateCurrentTemperatureAdminStatsCards();
+           this.updateCurrentLightAdminStatsCards();
+           this.updateCurrentAirHumidityAdminStatsCards();
+           this.updateFarmStatusAdminStatsCards();
+      }
+    },
+    async updateCurrentUsersCountAdminStatsCards()
+    {
         const response = await Api.getUsers();
         const usersCount = response.data.length;
         const index = this.adminStatsCards.findIndex(x => x.title ==="Users");
@@ -363,9 +465,11 @@ export default {
           footerText: "Updated now",
           footerIcon: "ti-reload"
         }
-        //this.adminStatsCards[index].value = usersCount.toString();
-        Vue.set(this.adminStatsCards, index, userModel);
 
+        Vue.set(this.adminStatsCards, index, userModel);
+    },
+   async  updateCurrentFarmsCountAdminStatsCards()
+    {
         const farmResponse = await Api.getFarms();
         const farmsCount = farmResponse.data.length;
         const farmIndex = this.adminStatsCards.findIndex(x => x.title ==="Farms");
@@ -379,7 +483,122 @@ export default {
         }
 
         Vue.set(this.adminStatsCards, farmIndex, farmModel);
-      }
+    },
+    updateCurrentSoilHumidityAdminStatsCards(){
+        const soilHumidityIndex = this.adminStatsCards.findIndex(x => x.title ==="Soil humidity");
+        const soilHumidity = {
+          type: "success",
+          icon: "ti-world",
+          title: "Soil humidity",
+          value: this.currentSoilHumidity,
+          footerText: this.lastMeasurmentDateTimeStampSoilHumidity,
+          footerIcon: "ti-reload"
+        }
+        Vue.set(this.adminStatsCards, soilHumidityIndex, soilHumidity);
+    },
+    updateCurrentTemperatureAdminStatsCards(){
+        const temperatureIndex = this.adminStatsCards.findIndex(x => x.title ==="Temperature");
+        const temperature = {
+          type: "warning",
+          icon: "ti-shine",
+          title: "Temperature",
+          value: this.currentTemperature,
+          footerText: this.lastMeasurmentDateTimeStampTemperature,
+          footerIcon: "ti-reload"
+        }
+        Vue.set(this.adminStatsCards, temperatureIndex, temperature);
+    },
+    updateCurrentLightAdminStatsCards(){
+        const index = this.adminStatsCards.findIndex(x => x.title ==="Light");
+        const model = {
+          type: "warning",
+          icon: "ti-light-bulb",
+          title: "Light",
+          value: this.currentLight,
+          footerText: this.lastMeasurmentDateTimeStampLight,
+          footerIcon: "ti-reload"
+        }
+        Vue.set(this.adminStatsCards, index, model);
+    },
+
+    updateCurrentAirHumidityAdminStatsCards()
+    {
+        const index = this.adminStatsCards.findIndex(x => x.title ==="Air humidity");
+        const model =       {
+          type: "info",
+          icon: "ti-cloud",
+          title: "Air humidity",
+          value: this.currentAirHumidity,
+          footerText: this.lastMeasurmentDateTimeStampAirHumidity,
+          footerIcon: "ti-reload"
+        }
+        Vue.set(this.adminStatsCards, index, model);
+    },
+
+    updateFarmStatusAdminStatsCards()
+    {
+        const index = this.adminStatsCards.findIndex(x => x.title ==="Status");
+        let status = "Offline";
+        let dateTimeStamp = "";
+
+        if(this.isOnline(this.lastMeasurmentDateTimeStampTemperature))
+        {
+            status = "Online"
+        }
+        else if(this.isOnline(this.lastMeasurmentDateTimeStampLight))
+        {
+            status = "Online"
+        }
+        else if(this.isOnline(this.lastMeasurmentDateTimeStampAirHumidity))
+        {
+            status = "Online"
+        }
+        else if(this.isOnline(this.lastMeasurmentDateTimeStampSoilHumidity))
+        {
+            status = "Online"
+        }
+
+        const model =         
+        {
+          type: "success",
+          icon: "ti-server",
+          title: "Status",
+          value: status,
+          footerText: this.refreshTimespan,
+          footerIcon: "ti-timer"
+        };
+        Vue.set(this.adminStatsCards, index, model);
+    },
+    isOnline(dateTimeStamp)
+    {
+        if(dateTimeStamp !== null && dateTimeStamp !== "")
+        {
+          let splitDateStemp = dateTimeStamp.split(".");
+          let day = splitDateStemp[0];
+          let month = splitDateStemp[1] - 1; // In javascript mounths are zero  based which meanse 0 is January
+          let year = splitDateStemp[2].substring(0,4);
+          let splitTimeStemp = splitDateStemp[2].split(" ")[1].split(":");
+          let hours = splitTimeStemp[0];
+          let minutes = splitTimeStemp[1];
+          let dateObj =  new Date(year,month,day,hours,minutes,0,0);
+          let today = new Date();
+          let todayday = today.getDate();
+          let todaymonth = today.getMonth();
+          let todayyear = today.getFullYear();
+          let days = this.dateDiffIndays(dateObj,today);
+
+          if(days == 0 || days == 1 || days == -1)
+          {
+            return true;           
+          }      
+        }
+        return false;
+    },
+    dateDiffIndays(date1, date2)
+    {
+      let diff =(date2.getTime() - date1.getTime()) / 1000;
+      diff /= (60 * 60 * 24);
+      return Math.abs(Math.round(diff));
     },
     async refreshFarmMeasurements() {
       await this.onFarmMeasurementsSubmit();
@@ -391,14 +610,16 @@ export default {
       this.minutesFromLastRefresh += 1;
     },
     async getCurrentFarmStats() {
-      const response = await this.$api.getCurrentFarmMeasurements(
+      const response = await this.$api.getLastFarmMeasurements(
         this.searchParams.farmId
       );
       this.currentFarmStats = response.data || {};
     },
     async onFarmMeasurementsSubmit() {
       const response = await this.$api.getFarmMeasurements(this.searchParams);
+
       this.farmMeasurements = response.data;
+
       this.temperatureChartConfig = await this.getChartConfiguration(
         SensorType.TEMPERATURE
       );
@@ -411,26 +632,50 @@ export default {
       this.soilHumiditySecondChartConfig = await this.getChartConfiguration(
         SensorType.SOIL_HUMIDITY
       );
+    },
+    onNewSensorMeasurement(farmId)
+    {       
+        if(farmId === this.searchParams.farmId)
+        {
+            this.refreshFarmMeasurements();
+        }
+    },
+    onFarmChange(newValue) 
+    {
+      if(newValue === null || newValue === undefined || newValue <= 0)
+      {
+          console.error("newValue null or undefined or less then 0 newValue:" + newValue);
+          return;
+      }
+      this.$sensorMeasurementHub.unSubscribe(this.searchParams.farmId);
+      this.searchParams.farmId = newValue;
+      this.$sensorMeasurementHub.subscribe(newValue);
+      this.refreshFarmMeasurements();
     }
   },
   created() {
-    this.refreshMeasurementInterval = setInterval(
-      this.refreshFarmMeasurements,
-      1000 * 60 * 5
-    ); // every 5 minutes
+    this.$sensorMeasurementHub.$on('NewSensorMeasurement', this.onNewSensorMeasurement);
+    this.refreshFarmMeasurements();
+
     this.refreshMinutesInterval = setInterval(this.refreshMinutes, 1000 * 60); // every minute
-    this.setAdminStatsCards();
   },
   destroyed() {
-    clearInterval(this.refreshMeasurementInterval);
     clearInterval(this.refreshMinutesInterval);
   },
+  beforeDestroy () {
+    // Make sure to cleanup SignalR event handlers when removing the component
+    this.$sensorMeasurementHub.unSubscribe(this.searchParams.farmId);
+    this.$sensorMeasurementHub.$off('NewSensorMeasurement');
+  },
+
+
   async beforeMount() {
     const userId = this.$store.getters.userId;
     const response = await this.$api.getFarmListForUser(userId);
     this.farmList = response.data;
     this.resetSearchParams();
     this.refreshFarmMeasurements();
+    this.$sensorMeasurementHub.subscribe(this.searchParams.farmId);
   }
 };
 </script>

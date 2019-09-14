@@ -26,9 +26,10 @@ module.exports = {
     autoOpenBrowser: true,
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
+    https: true,
     proxyTable: {
       '/api': {
-        target: 'http://193.198.208.164:13080/',
+        target: 'https://193.198.208.164:13080/',
         changeOrigin: true
       }
     },

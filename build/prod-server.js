@@ -34,7 +34,7 @@ Object.keys(proxyTable).forEach(function (context) {
 app.use(serveStatic(config.prod.assetsRoot));
 console.log(config.prod.assetsRoot);
 
-const uri = 'http://localhost:' + port
+const uri = 'https://localhost:' + port
 module.exports = app.listen(port, function (err) {
   if (err) {
     console.log(err)

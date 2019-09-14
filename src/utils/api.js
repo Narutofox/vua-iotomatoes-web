@@ -72,7 +72,7 @@ export const Api = {
 
   // SensorMeasurement API
   getFarmMeasurements: params => instance.get('/sensorMeasurements', { params }),
-  getCurrentFarmMeasurements: farmId => instance.get('/sensorMeasurements/current', { params: { farmId } })
+  getLastFarmMeasurements: farmId => instance.get('/sensorMeasurements/current', { params: { farmId } })
 }
 
 export default {

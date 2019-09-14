@@ -11,6 +11,9 @@ import Alert from './utils/alert'
 import Api from './utils/api'
 import App from './App'
 
+// SignalR
+import SensorMeasurementHub from './hubs/sensorMeasurementHub'
+
 // Store and router
 import router from './router'
 import store from './store'
@@ -43,6 +46,7 @@ Vue.use(vClickOutside)
 Vue.use(SideBar)
 Vue.use(Alert)
 Vue.use(Api)
+Vue.use(SensorMeasurementHub)
 
 /* eslint-disable no-new */
 export default new Vue({

@@ -3,5 +3,6 @@ var prodEnv = require('./prod.env')
 
 module.exports = merge(prodEnv, {
   NODE_ENV: '"development"',
-  BASE_URL: '"https://localhost:44375/api/"'
+  BASE_URL: '"https://localhost:44375/api/"',
+  SIGNALR_URL: '"https://localhost:44375/"'
 })

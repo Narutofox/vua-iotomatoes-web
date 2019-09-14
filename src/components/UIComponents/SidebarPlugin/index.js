@@ -43,7 +43,7 @@ const SidebarPlugin = {
         return this.$root.sidebarStore
       }
     })
-    
+
     Vue.component('side-bar', Sidebar)
   }
 }
