@@ -96,7 +96,7 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-lg-12" v-for="(sensor, idx) in filteredSensors" :key="idx">
+                <div class="col-lg-12" v-for="(sensor, idx) in sensors" :key="idx">                  
                   <fg-checkbox v-model="farm.sensorIds" :value="sensor.value" :label="sensor.text"/>
                 </div>
               </div>
@@ -146,6 +146,23 @@
           </div>
         </div>
       </div>
+      <div class="row" v-if="isAdmin && isEdit">
+          <div class="col-lg-12">
+            <div class="card">
+              <div class="header">
+                <h4 class="title">Sensor Rules</h4>
+                <a href="http://jsonlogic.com/" target="_blank">jsonlogic</a>
+              </div>
+              <div class="content">
+                <div class="row">
+                  <div class="col-lg-12" v-for="(sensorRule, idx) in sensorsRules" :key="idx">
+                    <fg-input type="text" :label="sensorRule.text" :value="sensorRule.conditions" v-model="sensorsRules[idx].conditions" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
       <div class="row">
         <div class="col-lg-12">
           <div class="text-center mt-1">
@@ -181,6 +198,9 @@ export default {
       actuators: [],
       rulesets: [],
       plants: [],
+      sensorsTypes:[],
+      rules:[],
+      sensorsRules:[],
       farm: {
         id: null,
         name: null,
@@ -231,6 +251,70 @@ export default {
 
       return list;
     },
+    setSensorRule(data){
+      
+      if(data.label !== null && data.label !== undefined &&  data.label !== "")
+      {     
+        let sensorName = data.label.match(/\((.*)\)/);      
+        if(sensorName !== null && sensorName !== undefined && sensorName.length > 0)
+        {
+          if(this.sensorsTypes !== null && this.sensorsTypes  !== undefined && Array.isArray(this.sensorsTypes) && this.sensorsTypes.length > 0)
+          {
+            let name =  sensorName[1];
+            let sensor = this.sensorsTypes.find(x=>x.name == name);
+            let sensorCode = sensor.code;
+
+            let rule = this.rules.find(x=>x.code == sensorCode);
+            if(rule !== null && rule !== undefined )
+            {
+              data.value = rule.conditions;
+            }
+           
+          }         
+        }          
+      }   
+    },
+    getSensorRule(data){
+      
+      if(data.text !== null && data.text !== undefined &&  data.text !== "")
+      {     
+        let sensorName = data.text.match(/\((.*)\)/);      
+        if(sensorName !== null && sensorName !== undefined && sensorName.length > 0)
+        {
+          if(this.sensorsTypes !== null && this.sensorsTypes  !== undefined && Array.isArray(this.sensorsTypes) && this.sensorsTypes.length > 0)
+          {
+            let name =  sensorName[1];
+            let sensor = this.sensorsTypes.find(x=>x.name == name);
+            let sensorCode = sensor.code;
+
+            let rule = this.rules.find(x=>x.code == sensorCode);
+            if(rule !== null && rule !== undefined )
+            {
+              return rule.conditions;
+            }
+           
+          }         
+        }
+        return "";          
+      }   
+    },
+    getSensorCode(data){
+      
+      if(data.text !== null && data.text !== undefined &&  data.text !== "")
+      {     
+        let sensorName = data.text.match(/\((.*)\)/);      
+        if(sensorName !== null && sensorName !== undefined && sensorName.length > 0)
+        {
+          if(this.sensorsTypes !== null && this.sensorsTypes  !== undefined && Array.isArray(this.sensorsTypes) && this.sensorsTypes.length > 0)
+          {
+            let name =  sensorName[1];
+            let sensor = this.sensorsTypes.find(x=>x.name == name);
+            return sensor.code;          
+          }         
+        }
+        return "";          
+      }   
+    },
     async onUpdateFarmSubmit() {
       try {
         if (this.isCreate) {
@@ -238,22 +322,27 @@ export default {
           this.$alert.success("Successfully created new farm");
           this.$router.push({ name: "farms" });
         } else {
-          await this.$api.updateFarm(this.farm);
+          await Promise.all([ 
+            this.$api.updateFarm(this.farm),
+           this.$api.createOrUpdateFarmRules(this.farm.id,this.sensorsRules) 
+          ]);
+
           this.$alert.success("Successfully updated farm data");
         }
       } catch (error) {
-        this.$alert.error("Failed to update date", error);
+        this.$alert.error("Failed to update", error);
       }
     }
   },
-  async beforeMount() {
+  async created() {
     const response = await Promise.all([
       this.$api.getUserList(),
       this.$api.getSensorList(),
       this.$api.getCityList(),
       this.$api.getActuatorList(),
       this.$api.getRulesetList(),
-      this.$api.getPlantList()
+      this.$api.getPlantList(),
+      this.$api.getSensorTypes()
     ]);
 
     const data = response.map(x => x.data);
@@ -263,11 +352,25 @@ export default {
     this.actuators = data[3];
     this.rulesets = data[4];
     this.plants = data[5];
-
-    if (this.isEdit) {
+    this.sensorsTypes = data[6];
+    
+    if (this.isEdit) 
+    {
       const response = await this.$api.getFarm(this.$route.params.id);
       this.farm = response.data;
+      const responseRules = await this.$api.getFarmRules(this.$route.params.id);     
+      this.rules =  responseRules.data;
+      let sensorsRulesArray = [];
+      this.sensors.forEach(function(sensor) {
+        sensorsRulesArray.push({
+            text:sensor.text, 
+            conditions: this.getSensorRule(sensor), 
+            code: this.getSensorCode(sensor)
+          });
+      },this);  
+      this.sensorsRules = sensorsRulesArray;   
     }
+
   }
 };
 </script>

@@ -78,6 +78,8 @@ export default {
     } else {
       this.inputElement.addEventListener("input", this.onInput);
     }
+    let obj = {label: this.label, value: this.value};
+    this.$emit('input-mounted',obj);
   },
   beforeDestroy() {
     if(this.cleaveInstance != null) {

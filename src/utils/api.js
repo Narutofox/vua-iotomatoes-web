@@ -49,10 +49,14 @@ export const Api = {
   getFarms: () => instance.get('/farms'),
   getFarm: id => instance.get(`/farms/${id}`),
   getFarmList: () => instance.get('/farms/list'),
+  getFarmRules: (id) => instance.get(`/farms/${id}/rules`),
+  createOrUpdateFarmRules: (id, rules) => instance.post(`/farms/${id}/createOrUpdateRules`, rules),
 
   // Sensor API
   getSensors: () => instance.get('/sensors'),
   getSensorList: () => instance.get('/sensors/list'),
+  getSensorType: (Name) => instance.get(`sensors/sensorType?name=${Name}`),
+  getSensorTypes: () => instance.get(`sensors/sensorTypes`),
 
   // City API
   getCities: () => instance.get('/cities'),
@@ -66,7 +70,7 @@ export const Api = {
   getRulesets: () => instance.get('/rulesets'),
   getRulesetList: () => instance.get('/rulesets/list'),
 
-  // Ruleset API
+  // Plants API
   getPlants: () => instance.get('/plants'),
   getPlantList: () => instance.get('/plants/list'),
 
